@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบแจ้งซ่อมภายในมหาวิทยาลัย</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <!-- ===================== หน้าเข้าสู่ระบบ ===================== -->
+  <section class="login-screen" id="login-screen">
+    <div class="login-visual">
+      <div class="login-brand"><div class="brand-icon">🔧</div><div><strong>UNI FIX</strong><small>University Maintenance System</small></div></div>
+      <div class="login-hero">
+        <div class="login-illustration">🛠️</div>
+        <p class="welcome-tag">SMART CAMPUS • BETTER SERVICE</p>
+        <h1>แจ้งซ่อมง่าย<br>ติดตามได้ทุกขั้นตอน</h1>
+        <p>ระบบจัดการงานซ่อมบำรุงภายในมหาวิทยาลัย<br>สำหรับนักศึกษา บุคลากร ช่างซ่อม และเจ้าหน้าที่</p>
+      </div>
+      <div class="login-visual-footer">University Maintenance Request System</div>
+    </div>
+    <div class="login-panel">
+      <form id="login-form" class="login-form">
+        <div class="mobile-login-brand"><div class="brand-icon">🔧</div><strong>UNI FIX</strong></div>
+        <p class="eyebrow">WELCOME BACK</p>
+        <h2>เข้าสู่ระบบ</h2>
+        <p class="login-subtitle">กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งาน</p>
+        <label>ชื่อผู้ใช้<input id="login-username" name="username" autocomplete="username" required placeholder="กรอกชื่อผู้ใช้"></label>
+        <label>รหัสผ่าน<input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="กรอกรหัสผ่าน"></label>
+        <p class="login-error hidden" id="login-error" role="alert"></p>
+        <button type="submit" class="primary-btn login-submit" id="login-submit">เข้าสู่ระบบ →</button>
+        <p class="auth-switch">ยังไม่มีบัญชี? <button type="button" data-auth-switch="register">สมัครสมาชิก</button></p>
+      </form>
+
+      <!-- ---------- สมัครสมาชิก (ได้สิทธิ์ผู้ใช้ทั่วไป) ---------- -->
+      <form id="register-form" class="login-form hidden" novalidate>
+        <div class="mobile-login-brand"><div class="brand-icon">🔧</div><strong>UNI FIX</strong></div>
+        <p class="eyebrow">CREATE ACCOUNT</p>
+        <h2>สมัครสมาชิก</h2>
+        <p class="login-subtitle">สร้างบัญชีเพื่อแจ้งซ่อมและติดตามสถานะได้ทุกที่</p>
+        <label><span>ชื่อ-นามสกุล <b class="req">*</b></span><input name="fullName" autocomplete="name" required maxlength="150" placeholder="เช่น นายสมชาย ใจดี"></label>
+        <label><span>ชื่อผู้ใช้ <b class="req">*</b></span><input name="username" autocomplete="username" required maxlength="30" placeholder="a-z, 0-9, _ อย่างน้อย 3 ตัว"></label>
+        <div class="login-row">
+          <label>อีเมล<input name="email" type="email" autocomplete="email" maxlength="150" placeholder="name@example.com"></label>
+          <label>เบอร์โทร<input name="phone" inputmode="tel" autocomplete="tel" maxlength="10" placeholder="0812345678"></label>
+        </div>
+        <label><span>รหัสผ่าน <b class="req">*</b></span><input name="password" type="password" autocomplete="new-password" required maxlength="72" placeholder="อย่างน้อย 8 ตัว มีตัวอักษรและตัวเลข"></label>
+        <label><span>ยืนยันรหัสผ่าน <b class="req">*</b></span><input name="confirmPassword" type="password" autocomplete="new-password" required maxlength="72" placeholder="พิมพ์รหัสผ่านอีกครั้ง"></label>
+        <p class="login-error hidden" id="register-error" role="alert"></p>
+        <button type="submit" class="primary-btn login-submit" id="register-submit">สมัครสมาชิก →</button>
+        <p class="auth-switch">มีบัญชีแล้ว? <button type="button" data-auth-switch="login">เข้าสู่ระบบ</button></p>
+        <p class="login-warning">บัญชีที่สมัครเองได้สิทธิ์ผู้ใช้ทั่วไป (แจ้งซ่อมและติดตามสถานะ) · บัญชีช่างซ่อมสร้างโดยผู้ดูแลระบบ</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== ตัวแอป (หลังล็อกอิน) ===================== -->
+  <div id="app-shell" class="hidden">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">🔧</div>
+      <div><strong>UNI FIX</strong><small>Maintenance System</small></div>
+    </div>
+    <!-- data-roles = บทบาทที่เห็นปุ่มนี้ (การตรวจสิทธิ์จริงอยู่ที่ backend) -->
+    <nav>
+      <button class="nav-link active" data-view="dashboard"><span>▦</span> ภาพรวมระบบ</button>
+      <button class="nav-link" data-view="my-jobs" data-roles="TECHNICIAN"><span>🧰</span> งานของฉัน</button>
+      <button class="nav-link" data-view="requests" data-roles="ADMIN USER"><span>☷</span> <span class="nav-label" id="nav-requests-label">รายการแจ้งซ่อม</span></button>
+      <button class="nav-link" data-view="new-request" data-roles="ADMIN USER"><span>＋</span> แจ้งซ่อมใหม่</button>
+      <button class="nav-link" data-view="technicians" data-roles="ADMIN"><span>👷</span> ช่างซ่อม</button>
+    </nav>
+    <div class="role-note" id="role-note"></div>
+    <div class="sidebar-bottom">
+      <div class="profile-avatar" id="profile-avatar">AD</div>
+      <div><strong id="profile-name"></strong><small id="profile-role"></small></div>
+      <button class="logout-btn" id="logout-btn" title="ออกจากระบบ" aria-label="ออกจากระบบ">↪</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">UNIVERSITY MAINTENANCE</p>
+        <h1 id="page-title">ภาพรวมระบบ</h1>
+      </div>
+      <div class="top-actions">
+        <span class="role-pill" id="role-pill"></span>
+        <span class="today" id="today-label"></span>
+        <button class="primary-btn" id="top-new-btn" data-roles="ADMIN USER">＋ แจ้งซ่อมใหม่</button>
+      </div>
+    </header>
+
+    <!-- ---------- ภาพรวม ---------- -->
+    <section class="view active" id="dashboard-view">
+      <div class="welcome-card">
+        <div>
+          <p class="welcome-tag" id="welcome-tag">ระบบจัดการงานซ่อมบำรุง</p>
+          <h2 id="welcome-title">จัดการทุกปัญหา<br>ได้ในที่เดียว</h2>
+          <p id="welcome-text">แจ้งปัญหา ติดตามสถานะ และจัดการงานซ่อมภายในมหาวิทยาลัยอย่างเป็นระบบ</p>
+          <button class="light-btn" id="welcome-new-btn" data-roles="ADMIN USER">＋ สร้างรายการแจ้งซ่อม</button>
+          <button class="light-btn" id="welcome-jobs-btn" data-roles="TECHNICIAN">🧰 ดูงานที่ได้รับมอบหมาย</button>
+        </div>
+        <div class="welcome-art" aria-hidden="true">
+          <div class="art-circle">🔧</div><div class="art-card">✓ <span>Repair made simple</span></div>
+        </div>
+      </div>
+
+      <div class="section-heading">
+        <div><h2>สรุปงานแจ้งซ่อม</h2><p id="stats-subtitle">ภาพรวมรายการแจ้งซ่อมทั้งหมดในระบบ</p></div>
+        <button class="text-btn" id="view-all-btn">ดูรายการทั้งหมด →</button>
+      </div>
+      <div class="stats-grid">
+        <article class="stat-card"><div class="stat-top"><span>รายการทั้งหมด</span><span class="stat-icon purple">▤</span></div><strong id="stat-total">0</strong><small>รายการแจ้งซ่อม</small></article>
+        <article class="stat-card"><div class="stat-top"><span>รอดำเนินการ</span><span class="stat-icon orange">◷</span></div><strong id="stat-pending">0</strong><small>รอรับเรื่อง / รับเรื่องแล้ว</small></article>
+        <article class="stat-card"><div class="stat-top"><span>กำลังดำเนินการ</span><span class="stat-icon blue">⚙</span></div><strong id="stat-progress">0</strong><small>อยู่ระหว่างการซ่อม</small></article>
+        <article class="stat-card"><div class="stat-top"><span>ซ่อมเสร็จแล้ว</span><span class="stat-icon green">✓</span></div><strong id="stat-done">0</strong><small>ดำเนินการเรียบร้อย</small></article>
+      </div>
+
+      <div class="content-card">
+        <div class="section-heading compact"><div><h2>รายการล่าสุด</h2><p>5 รายการล่าสุดที่คุณเข้าถึงได้</p></div><button class="outline-btn" id="recent-view-btn">ดูทั้งหมด</button></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>รหัส / รายการ</th><th>สถานที่</th><th>ประเภท</th><th>ช่างผู้รับผิดชอบ</th><th>วันที่แจ้ง</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+            <tbody id="recent-table-body"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="recent-empty">ยังไม่มีรายการแจ้งซ่อม</div>
+      </div>
+    </section>
+
+    <!-- ---------- รายการแจ้งซ่อม (ADMIN: ทั้งหมด · USER: ของฉัน) ---------- -->
+    <section class="view" id="requests-view">
+      <div class="section-heading"><div><h2 id="requests-heading">รายการแจ้งซ่อมทั้งหมด</h2><p>ค้นหาและติดตามสถานะงานซ่อม</p></div><button class="primary-btn" id="list-new-btn">＋ แจ้งซ่อมใหม่</button></div>
+      <div class="content-card">
+        <div class="toolbar">
+          <label class="search-box">⌕ <input type="search" id="search-input" placeholder="ค้นหารหัส หัวข้อ สถานที่ หรือชื่อผู้แจ้ง..."></label>
+          <select id="status-filter" aria-label="กรองตามสถานะ"><option value="">ทุกสถานะ</option></select>
+          <select id="category-filter" aria-label="กรองตามประเภท"><option value="">ทุกประเภท</option></select>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>รหัส / รายการ</th><th>สถานที่</th><th>ประเภท</th><th>ช่างผู้รับผิดชอบ</th><th>วันที่แจ้ง</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="all-table-body"></tbody></table>
+        </div>
+        <div class="empty-state hidden" id="all-empty">ไม่พบรายการแจ้งซ่อมที่ตรงกับเงื่อนไข</div>
+      </div>
+    </section>
+
+    <!-- ---------- แจ้งซ่อมใหม่ ---------- -->
+    <section class="view" id="new-request-view">
+      <div class="form-intro"><div class="form-icon">🛠️</div><div><h2>แจ้งซ่อมรายการใหม่</h2><p>กรอกรายละเอียดปัญหาให้ครบถ้วน เพื่อให้เจ้าหน้าที่ดำเนินการได้รวดเร็วขึ้น</p></div></div>
+      <form id="repair-form" class="content-card repair-form">
+        <div class="form-grid">
+          <label>หัวข้อปัญหา <span>*</span><input name="title" required maxlength="100" placeholder="เช่น หลอดไฟในห้องเรียนไม่ติด"></label>
+          <label>ประเภทงานซ่อม <span>*</span><select name="categoryId" id="form-category" required><option value="">เลือกประเภท</option></select></label>
+          <label>อาคาร <span>*</span><select name="buildingId" id="form-building" required><option value="">เลือกอาคาร</option></select></label>
+          <label>ห้อง / ตำแหน่ง <span>*</span><input name="room" required maxlength="100" placeholder="เช่น ห้อง 204 ชั้น 2"></label>
+          <label>ชื่อผู้แจ้ง <span>*</span><input name="reporterName" id="form-reporter" required maxlength="150" placeholder="ชื่อ-นามสกุล"></label>
+          <label>เบอร์ติดต่อ <input name="reporterPhone" id="form-phone" inputmode="tel" maxlength="10" placeholder="เช่น 0812345678 (ถ้ามี)"></label>
+          <label>ความเร่งด่วน
+            <select name="priority">
+              <option value="NORMAL">ปกติ</option><option value="LOW">ไม่เร่งด่วน</option><option value="HIGH">เร่งด่วน</option><option value="URGENT">ด่วนที่สุด</option>
+            </select>
+          </label>
+          <label class="full-width">รายละเอียดปัญหา <span>*</span><textarea name="description" rows="5" required maxlength="2000" placeholder="อธิบายอาการหรือปัญหาที่พบ..."></textarea></label>
+          <label class="full-width">แนบรูปภาพปัญหา (ถ้ามี)<input type="file" id="repair-image" accept="image/*"><small class="field-help">ระบบจะย่อขนาดรูปก่อนอัปโหลด (ไม่เกิน 5 MB)</small><img id="image-preview" class="image-preview hidden" alt="ตัวอย่างรูปภาพปัญหา"></label>
+        </div>
+        <div class="form-note">ⓘ กรุณาระบุสถานที่ให้ชัดเจน เพื่อช่วยให้ช่างเข้าตรวจสอบได้สะดวก</div>
+        <p class="form-error hidden" id="form-error" role="alert"></p>
+        <div class="form-actions"><button type="reset" class="outline-btn">ล้างข้อมูล</button><button type="submit" class="primary-btn" id="repair-submit">ส่งรายการแจ้งซ่อม →</button></div>
+      </form>
+    </section>
+
+    <!-- ---------- งานของฉัน (ช่าง) ---------- -->
+    <section class="view" id="my-jobs-view">
+      <div class="section-heading">
+        <div><h2>งานที่ได้รับมอบหมาย</h2><p>อัปเดตสถานะงานเมื่อเริ่มซ่อมและเมื่อซ่อมเสร็จ</p></div>
+        <div class="segmented" id="jobs-tabs" role="tablist">
+          <button class="active" data-jobs-filter="active" role="tab">ต้องดำเนินการ <b id="jobs-count-active">0</b></button>
+          <button data-jobs-filter="done" role="tab">เสร็จแล้ว <b id="jobs-count-done">0</b></button>
+        </div>
+      </div>
+      <div class="job-grid" id="job-grid"></div>
+      <div class="empty-state content-card hidden" id="jobs-empty">ยังไม่มีงานในหมวดนี้ 🎉</div>
+    </section>
+
+    <!-- ---------- ช่างซ่อม (แอดมิน) ---------- -->
+    <section class="view" id="technicians-view">
+      <div class="section-heading"><div><h2>ช่างซ่อมทั้งหมด</h2><p>ความถนัด ภาระงาน และสถานะการรับงานของช่างแต่ละคน</p></div><button class="primary-btn" id="add-tech-btn">＋ เพิ่มช่าง</button></div>
+      <div class="content-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ช่าง</th><th>ฝ่าย</th><th>ความถนัด</th><th>งานค้าง</th><th>ซ่อมเสร็จ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+            <tbody id="tech-table-body"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="tech-empty">ยังไม่มีช่างในระบบ</div>
+      </div>
+
+      <form id="tech-form" class="content-card repair-form hidden">
+        <div class="section-heading compact"><div><h2>เพิ่มช่างใหม่</h2><p>ระบบจะสร้างบัญชีเข้าสู่ระบบให้ช่างด้วย</p></div></div>
+        <div class="form-grid">
+          <label>ชื่อ-นามสกุล <span>*</span><input name="fullName" required maxlength="150" placeholder="เช่น นายสมศักดิ์ ใจดี"></label>
+          <label>รหัสพนักงาน <span>*</span><input name="employeeCode" required maxlength="20" placeholder="เช่น TC-004"></label>
+          <label>ชื่อผู้ใช้ <span>*</span><input name="username" required maxlength="30" placeholder="a-z, 0-9, _"></label>
+          <label>รหัสผ่านเริ่มต้น <span>*</span><input name="password" type="password" required minlength="6" placeholder="อย่างน้อย 6 ตัว"></label>
+          <label>เบอร์โทร<input name="phone" inputmode="tel" maxlength="10" placeholder="0812345678"></label>
+          <label>ฝ่าย<input name="department" maxlength="100" placeholder="งานอาคารสถานที่"></label>
+          <fieldset class="full-width skill-picker"><legend>ความถนัด <span>*</span></legend><div id="tech-skill-options"></div></fieldset>
+        </div>
+        <p class="form-error hidden" id="tech-form-error" role="alert"></p>
+        <div class="form-actions"><button type="button" class="outline-btn" id="tech-cancel-btn">ยกเลิก</button><button type="submit" class="primary-btn">บันทึกช่าง</button></div>
+      </form>
+    </section>
+
+    <footer>University Maintenance Request System <span>•</span> ต้นแบบสำหรับการศึกษา</footer>
+  </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ---------- หน้าต่างรายละเอียด ---------- -->
+  <dialog id="detail-dialog" class="detail-dialog">
+    <div class="dialog-head"><div><p class="eyebrow">REPAIR REQUEST DETAILS</p><h2>รายละเอียดการแจ้งซ่อม</h2></div><button class="icon-btn" id="close-dialog" aria-label="ปิด">✕</button></div>
+    <div id="detail-content"></div>
+    <div id="detail-actions"></div>
+    <div class="dialog-actions"><button class="outline-btn danger-btn hidden" id="delete-detail-btn">ลบรายการ</button><button class="primary-btn" id="close-detail-btn">ปิดหน้าต่าง</button></div>
+  </dialog>
+</body>
+</html>
